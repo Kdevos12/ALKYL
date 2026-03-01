@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ALKYL — Computational Chemistry CLI
+# Wrapper around Claude Code with dedicated config and splash screen
+
+ALKYL_CONFIG="$HOME/.alkyl"
+ALKYL_SYSTEM_PROMPT="$(cat "$ALKYL_CONFIG/config/CLAUDE.md" 2>/dev/null)"
+
+# Splash screen: shown only in interactive TTY, before Claude Code TUI takes over
+if [ -t 1 ] && [[ ! " $* " =~ " -p " ]] && [[ ! " $* " =~ " --print " ]]; then
+    bash "$ALKYL_CONFIG/hooks/banner.sh"
+    sleep 1.5
+fi
+
+exec claude \
+  --settings "$ALKYL_CONFIG/config/settings.json" \
+  --append-system-prompt "$ALKYL_SYSTEM_PROMPT" \
+  "$@"

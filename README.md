@@ -1,18 +1,18 @@
 # ALKYL
 
-**Computational Chemistry Assistant** — a Claude Code plugin specialized for molecular modeling, quantum chemistry, and cheminformatics.
+```
+ ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓████████▓▒░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓████████▓▒░
+```
 
-## What it does
+**Computational Chemistry plugin for [Claude Code](https://claude.ai/code).**
 
-ALKYL augments Claude Code with:
-- A computational chemistry identity and context injected into every session
-- Chemistry-specific skills (RDKit, cheminformatics workflows, SMILES reference)
-- A dedicated `alkyl` command with splash screen
-
-## Requirements
-
-- [Claude Code](https://claude.ai/code) installed and authenticated
-- Bash
+Adds molecular modeling, quantum chemistry, and cheminformatics context to every Claude Code session — no separate command, no fork, just `claude`.
 
 ## Install
 
@@ -22,47 +22,33 @@ cd alkyl
 bash install.sh
 ```
 
-Then run:
+That's it. Open a new `claude` session and ALKYL is active.
+
+## What it adds
+
+- **Identity** — Claude introduces itself as ALKYL, a computational chemistry assistant
+- **Chemistry context** — IUPAC nomenclature, SMILES notation, computational cost awareness
+- **Skills** — RDKit patterns, cheminformatics workflows, molecular representations
+
+## Stack
+
+`RDKit` · `ASE` · `ORCA` · `Gaussian` · `OpenBabel` · `py3Dmol` · `MDAnalysis` · `DeepChem`
+
+## Uninstall
 
 ```bash
-alkyl
+bash uninstall.sh
 ```
-
-## Usage
-
-`alkyl` is a drop-in replacement for `claude` with chemistry context pre-loaded:
-
-```bash
-alkyl                          # interactive session
-alkyl -p "Draw the SMILES for caffeine"   # non-interactive
-alkyl --resume <session-id>    # resume a session
-```
-
-All Claude Code flags work as-is.
 
 ## Project structure
 
 ```
 ALKYL/
-├── alkyl                   # CLI wrapper
-├── install.sh              # one-command install
+├── install.sh          # injects chemistry context into ~/.claude/CLAUDE.md
+├── uninstall.sh        # removes the injected block
 ├── config/
-│   ├── CLAUDE.md           # chemistry system context
-│   └── settings.json       # hooks config
-├── hooks/
-│   └── banner.sh           # splash screen
+│   └── CLAUDE.md       # chemistry identity and behavior
 └── skills/
-    ├── rdkit.md            # RDKit cheminformatics guide
+    ├── rdkit.md        # RDKit patterns and usage
     └── cheminformatics.md  # molecular representations & workflows
 ```
-
-## Uninstall
-
-```bash
-rm -rf ~/.alkyl
-rm ~/.local/bin/alkyl
-```
-
----
-
-*Built on [Claude Code](https://claude.ai/code) by Anthropic.*

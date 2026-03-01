@@ -1,63 +1,51 @@
 #!/usr/bin/env bash
 # ALKYL — Install script
+# Appends chemistry context to ~/.claude/CLAUDE.md
 # Usage: bash install.sh
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ALKYL_HOME="$HOME/.alkyl"
-BIN_DIR="$HOME/.local/bin"
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+MARKER_START="<!-- ALKYL-START -->"
+MARKER_END="<!-- ALKYL-END -->"
 
-CYAN='\033[0;36m'
+# Neon blue #1F51FF
+BLUE='\033[38;2;31;81;255m'
 BOLD='\033[1m'
 GREEN='\033[0;32m'
 DIM='\033[2m'
 RESET='\033[0m'
 
-echo ""
-printf "${CYAN}${BOLD}"
+printf "\n${BLUE}${BOLD}"
 cat << 'EOF'
- ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        
-░▒▓████████▓▒░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░        
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░        
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░        
-░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓████████▓▒░     
+ ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░
+░▒▓████████▓▒░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░
+░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓████████▓▒░
 EOF
 printf "${RESET}"
-printf "  ${DIM}Installing ALKYL...${RESET}\n\n"
+printf "  ${DIM}Computational Chemistry · Claude Code Plugin${RESET}\n\n"
 
-# --- Config directory ---
-mkdir -p "$ALKYL_HOME/hooks"
-mkdir -p "$ALKYL_HOME/config"
-mkdir -p "$ALKYL_HOME/skills"
+# --- Inject into ~/.claude/CLAUDE.md ---
+mkdir -p "$(dirname "$CLAUDE_MD")"
+touch "$CLAUDE_MD"
 
-cp "$REPO_DIR/config/CLAUDE.md"     "$ALKYL_HOME/config/CLAUDE.md"
-cp "$REPO_DIR/config/settings.json" "$ALKYL_HOME/config/settings.json"
-
-# Fix absolute path in settings.json for this user
-sed -i "s|/home/de/.alkyl|$ALKYL_HOME|g" "$ALKYL_HOME/config/settings.json"
-
-cp "$REPO_DIR/hooks/banner.sh"  "$ALKYL_HOME/hooks/banner.sh"
-chmod +x "$ALKYL_HOME/hooks/banner.sh"
-
-cp "$REPO_DIR/skills/"*.md "$ALKYL_HOME/skills/" 2>/dev/null || true
-
-# --- alkyl command ---
-mkdir -p "$BIN_DIR"
-cp "$REPO_DIR/alkyl" "$BIN_DIR/alkyl"
-
-# Fix paths in alkyl wrapper for this user
-sed -i "s|/home/de/.alkyl|$ALKYL_HOME|g" "$BIN_DIR/alkyl"
-chmod +x "$BIN_DIR/alkyl"
-
-# --- PATH check ---
-if ! echo "$PATH" | grep -q "$BIN_DIR"; then
-    echo "  ⚠  Add this to your ~/.bashrc or ~/.zshrc:"
-    echo "     export PATH=\"\$HOME/.local/bin:\$PATH\""
-    echo ""
+# Remove existing ALKYL block if present (idempotent install)
+if grep -q "$MARKER_START" "$CLAUDE_MD" 2>/dev/null; then
+    sed -i "/$MARKER_START/,/$MARKER_END/d" "$CLAUDE_MD"
 fi
 
-printf "  ${GREEN}✓ Installed to $ALKYL_HOME${RESET}\n"
-printf "  ${GREEN}✓ Command: $BIN_DIR/alkyl${RESET}\n\n"
-printf "  Run ${BOLD}alkyl${RESET} to start.\n\n"
+# Append chemistry context
+{
+    echo ""
+    echo "$MARKER_START"
+    cat "$REPO_DIR/config/CLAUDE.md"
+    echo "$MARKER_END"
+} >> "$CLAUDE_MD"
+
+printf "  ${GREEN}✓ Chemistry context injected into $CLAUDE_MD${RESET}\n"
+printf "  ${GREEN}✓ ALKYL active in all future claude sessions${RESET}\n\n"
+printf "  ${DIM}Uninstall: bash uninstall.sh${RESET}\n\n"

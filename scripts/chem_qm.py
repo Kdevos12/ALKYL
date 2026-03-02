@@ -29,7 +29,10 @@ def smiles_to_3d(smiles: str):
     mol = Chem.AddHs(mol)
     params = AllChem.ETKDGv3()
     params.randomSeed = 42
-    AllChem.EmbedMolecule(mol, params)
+    result = AllChem.EmbedMolecule(mol, params)
+    if result == -1:
+        print("3D embedding failed for this SMILES.", file=sys.stderr)
+        sys.exit(1)
     AllChem.MMFFOptimizeMolecule(mol)
     return mol
 
@@ -43,8 +46,7 @@ def write_orca(mol, method: str, basis: str, task: str,
     xyz = get_xyz_block(mol)
     keyword = TASK_ORCA.get(task, task)
     return (
-        f"! {method} {basis}\n"
-        f"! {keyword}\n"
+        f"! {method} {basis} {keyword}\n"
         f"\n"
         f"* xyz {charge} {mult}\n"
         f"{xyz}\n"
@@ -89,6 +91,8 @@ def parse_orca_output(path: str) -> dict:
                 pass
     if freqs:
         result["frequencies_cm1"] = freqs
+    if not result:
+        result["warning"] = "No recognized patterns found in output file"
     return result
 
 

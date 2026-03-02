@@ -20,7 +20,7 @@ def test_generate_orca_input(tmp_path):
     content = out_file.read_text()
     assert "B3LYP" in content
     assert "6-31G*" in content
-    assert "! Opt" in content
+    assert " Opt" in content
 
 def test_generate_gaussian_input(tmp_path):
     out_file = tmp_path / "aspirin.gjf"

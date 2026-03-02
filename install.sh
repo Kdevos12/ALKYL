@@ -46,6 +46,10 @@ fi
     echo "$MARKER_END"
 } >> "$CLAUDE_MD"
 
+# Resolve and inject actual scripts path
+SCRIPTS_ABS="$REPO_DIR/scripts"
+sed -i "s|ALKYL_SCRIPTS_PATH|${SCRIPTS_ABS}|g" "$CLAUDE_MD"
+
 printf "  ${GREEN}✓ Chemistry context injected into $CLAUDE_MD${RESET}\n"
 printf "  ${GREEN}✓ ALKYL active in all future claude sessions${RESET}\n\n"
 printf "  ${DIM}Uninstall: bash uninstall.sh${RESET}\n\n"

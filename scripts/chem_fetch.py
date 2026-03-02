@@ -16,13 +16,16 @@ def _get_json(url: str) -> dict:
     try:
         with urllib.request.urlopen(url, timeout=15) as resp:
             return json.loads(resp.read().decode())
-    except Exception as e:
-        print(f"HTTP error fetching {url}: {e}", file=sys.stderr)
+    except urllib.error.URLError as e:
+        print(f"Network error fetching {url}: {e}", file=sys.stderr)
+        sys.exit(1)
+    except (json.JSONDecodeError, UnicodeDecodeError) as e:
+        print(f"Failed to parse response from {url}: {e}", file=sys.stderr)
         sys.exit(1)
 
 
 def fetch_pubchem(args) -> dict:
-    if args.cid:
+    if args.cid is not None:
         namespace, ident = "cid", str(args.cid)
     elif args.name:
         namespace, ident = "name", urllib.parse.quote(args.name)
@@ -35,6 +38,13 @@ def fetch_pubchem(args) -> dict:
     props = "CanonicalSMILES,InChI,InChIKey,IUPACName,MolecularWeight,XLogP"
     url = f"{PUBCHEM_BASE}/compound/{namespace}/{ident}/property/{props}/JSON"
     data = _get_json(url)
+
+    # PubChem returns 200 + Fault body for unknown molecules
+    if "Fault" in data:
+        msg = data["Fault"].get("Message", "Unknown PubChem error")
+        print(f"PubChem error: {msg}", file=sys.stderr)
+        sys.exit(1)
+
     props_data = data["PropertyTable"]["Properties"][0]
 
     result = {
@@ -72,7 +82,7 @@ def fetch_chembl(args) -> dict:
         mol = data
 
     struct = mol.get("molecule_structures") or {}
-    return {
+    result = {
         "chembl_id": mol.get("molecule_chembl_id"),
         "smiles": struct.get("canonical_smiles"),
         "inchi": struct.get("standard_inchi"),
@@ -82,6 +92,11 @@ def fetch_chembl(args) -> dict:
         "mw": mol.get("molecule_properties", {}).get("full_mwt"),
         "logp": mol.get("molecule_properties", {}).get("alogp"),
     }
+    # Apply --properties filter if requested (same as PubChem)
+    if args.properties:
+        keep = {p.strip() for p in args.properties.split(",")}
+        result = {k: v for k, v in result.items() if k in keep or k == "chembl_id"}
+    return result
 
 
 def main():

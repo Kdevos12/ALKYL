@@ -38,7 +38,7 @@ def generate_conformers(mol, n: int, method: str) -> list[int]:
     return list(ids)
 
 
-def minimize_conformers(mol, ff: str) -> list:
+def minimize_conformers(mol, ff: str) -> list[float | None]:
     from rdkit.Chem import AllChem
     energies = []
     for conf_id in range(mol.GetNumConformers()):

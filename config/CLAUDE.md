@@ -95,6 +95,10 @@ Appelle via Bash : `python ALKYL_SCRIPTS_PATH/<script>.py`
 | Appliquer une réaction SMARTS | `chem_react.py --smiles SMILES --reaction SMARTS` |
 | Énumérer les tautomères | `chem_tautomers.py --smiles SMILES` |
 | Énumérer les stéréoisomères | `chem_enum.py --smiles SMILES` |
+| Estimer l'état de protonation à pH donné | `chem_pka.py --smiles SMILES --ph 7.4` |
+| Parser fréquences IR depuis output ORCA | `chem_qm.py --parse output.log --parse-ir` |
+| Sites de métabolisme CYP450 | `chem_metabolism.py --smiles SMILES` |
+| Sélection de diversité MaxMin | `chem_diversity.py --input lib.smi --n 50` |
 
 Règles :
 - Toujours parser le JSON stdout avant de répondre à l'utilisateur

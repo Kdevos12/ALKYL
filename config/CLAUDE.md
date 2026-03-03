@@ -53,6 +53,18 @@ Use these directly — no local maintenance needed:
 - `scientific-skills:sympy` — calcul symbolique, cinétique, équilibres
 - `scientific-skills:networkx` — graphes moléculaires, réseaux SAR
 
+**Docking / Drug discovery**
+- `scientific-skills:diffdock` — docking IA (DiffDock) : poses 3D, confidence, virtual screening
+- `scientific-skills:rowan` — cloud QM : AutoDock Vina, DFT, pKa, Chai-1/Boltz cofolding (clé API)
+- `scientific-skills:pytdc` — Therapeutics Data Commons : ADME/tox/DTI datasets, oracles
+- `scientific-skills:torchdrug` — rétrosynthèse, génération moléculaire, GNN drug discovery
+
+**Bases de données spécialisées**
+- `scientific-skills:zinc-database` — ZINC 230M+ composés achetables, 3D-ready pour docking
+- `scientific-skills:pdb-database` — RCSB PDB : structures protéiques 3D
+- `scientific-skills:drugbank-database` — médicaments approuvés, interactions, cibles
+- `scientific-skills:opentargets-database` — associations cible-maladie, tractabilité
+
 **Calcul quantique**
 - `scientific-skills:qiskit` — IBM Quantum, algorithmes VQE
 - `scientific-skills:pennylane` — QML, variational circuits
@@ -71,6 +83,18 @@ Appelle via Bash : `python ALKYL_SCRIPTS_PATH/<script>.py`
 | Préparer input ORCA/Gaussian | `chem_qm.py --engine orca` |
 | Parser output QM | `chem_qm.py --parse output.log` |
 | Récupérer molécule PubChem/ChEMBL | `chem_fetch.py` |
+| Standardiser une molécule (desalt, neutralize) | `chem_standardize.py --smiles SMILES` |
+| Analyse structurale complète (FG, stéréo, QED, SA) | `chem_analyze.py --smiles SMILES` |
+| Traiter une librairie en batch (SDF/SMI/CSV) | `chem_batch.py --input lib.smi --descriptors all --lipinski` |
+| Recherche sous-structure (SMILES ou SMARTS) | `chem_search.py --query SMILES --library lib.sdf --mode substructure` |
+| Recherche par similarité Tanimoto | `chem_search.py --query SMILES --library lib.smi --mode similarity --threshold 0.7` |
+| Recherche exacte (canonical SMILES) | `chem_search.py --query SMILES --library lib.smi --mode exact` |
+| Scaffold Murcko + fragments BRICS | `chem_scaffold.py --smiles SMILES` |
+| Comparer deux molécules (MCS, Tanimoto, Δprop) | `chem_compare.py --smiles-a A --smiles-b B` |
+| Filtres drug-likeness multi-règles | `chem_filter.py --smiles SMILES` |
+| Appliquer une réaction SMARTS | `chem_react.py --smiles SMILES --reaction SMARTS` |
+| Énumérer les tautomères | `chem_tautomers.py --smiles SMILES` |
+| Énumérer les stéréoisomères | `chem_enum.py --smiles SMILES` |
 
 Règles :
 - Toujours parser le JSON stdout avant de répondre à l'utilisateur

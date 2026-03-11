@@ -43,6 +43,7 @@ RDKit · ASE · ORCA · Gaussian · OpenBabel · py3Dmol · MDAnalysis · DeepCh
 - `chem-brainstorm` — brainstorming workflow, 4 rigid protocols, integrates all MCPs
 - `daylight-theory` — SMILES/SMARTS/SMIRKS spec, fingerprints, similarity metrics
 - `nextflow` — HPC/cloud pipelines for computational chemistry
+- `organic-mechanisms` — EASE framework: polar mechanisms, SN1/SN2/E1/E2, retrosynthesis, arrow pushing
 - `lit-rescue` — last resort: Perplexity→bioRxiv→PubMed, confidence ★★★→☆☆☆
 
 ### Marketplace skills (auto-maintained, outsourced)

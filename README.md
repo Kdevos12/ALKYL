@@ -10,129 +10,239 @@
 ░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓████████▓▒░
 ```
 
-**Computational chemistry plugin for [Claude Code](https://claude.ai/code).**
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-blueviolet)](https://claude.ai/code)
+[![Skills](https://img.shields.io/badge/skills-23-green)](#skills)
+[![Scripts](https://img.shields.io/badge/scripts-23-green)](#scripts)
+[![Tests](https://img.shields.io/badge/tests-162-brightgreen)](tests/)
 
-Transforms Claude Code into a specialized computational chemistry assistant — molecular modeling, drug discovery, quantum chemistry, MD simulations, and machine learning for molecules. No separate command, no wrapper, just `claude`.
+**A [Claude Code](https://claude.ai/code) plugin for computational chemistry and drug discovery.**
 
-## Install
+ALKYL transforms Claude Code into a specialized computational chemistry assistant. Install once, then work naturally: RDKit cheminformatics, molecular docking, MD simulations, quantum chemistry, free energy calculations, and ML-guided drug design — all through plain conversation, with no wrapper CLI.
+
+> Designed for computational chemists, medicinal chemists, and drug discovery researchers who use Claude Code as their daily driver.
+
+---
+
+## Installation
+
+### Prerequisites
+
+- [Claude Code](https://claude.ai/code) installed and working (`claude --version`)
+- Git
+- Python ≥ 3.9 (for scripts and tests)
+
+### Step 1 — Clone the repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/alkyl
 cd alkyl
-bash install.sh
 ```
 
-Open a new `claude` session. ALKYL is active.
-
-## Uninstall
+### Step 2 — Install ALKYL
 
 ```bash
-bash uninstall.sh
+bash alkyl.sh install
+```
+
+This injects a chemistry-specialized context block into `~/.claude/CLAUDE.md` — the global configuration file Claude Code reads at every session start. No daemon, no wrapper, no separate command.
+
+### Step 3 — Set up the Python environment (for scripts)
+
+```bash
+bash alkyl.sh venv
+```
+
+Creates `.venv/` with RDKit and pytest. Required only if you want to use the standalone scripts or run tests.
+
+### Step 4 — Verify
+
+```bash
+bash alkyl.sh status
+```
+
+Expected output:
+```
+✓ Installed — /home/<user>/.claude/CLAUDE.md
+  Block size: ~150 lines
+  Scripts: /path/to/alkyl/scripts
+  Skills:  23 loaded
+```
+
+### Step 5 — Open a new Claude Code session
+
+```bash
+claude
+```
+
+ALKYL is now active. Try:
+```
+"Compute QED and SA score for aspirin: CC(=O)Oc1ccccc1C(=O)O"
+"Set up a virtual screening run against PDB:3HTB"
+"Write an ORCA B3LYP-D3BJ/def2-TZVP geometry optimization input"
 ```
 
 ---
 
-## What ALKYL provides
+## How it works
 
-### Identity & behavior
-- Specialized identity as **ALKYL**, a computational chemistry assistant
-- Defaults to IUPAC nomenclature, SMILES notation, and computational cost awareness
-- Adapts language to user context (English/French)
+ALKYL injects a chemistry-specialized context block into `~/.claude/CLAUDE.md`:
 
-### 22 chemistry skills
+```
+bash alkyl.sh install
+  → appends ALKYL block to ~/.claude/CLAUDE.md
+  → idempotent: re-running replaces the old block cleanly
 
-Skills are loaded on demand in Claude Code sessions. Each skill covers a specific domain with practical code patterns and theoretical context.
+bash alkyl.sh uninstall
+  → removes the block via <!-- ALKYL-START/END --> markers
+```
+
+**Skills** are Markdown reference files in `skills/`. They are loaded on demand in Claude Code sessions using the built-in `/skill` mechanism — only the relevant skill is loaded, keeping context lean.
+
+### All commands
+
+```bash
+bash alkyl.sh install              # install ALKYL context
+bash alkyl.sh venv                 # create .venv with RDKit
+bash alkyl.sh status               # show installation status and MCP keys
+bash alkyl.sh repair               # force re-inject config (fixes corruption)
+bash alkyl.sh uninstall            # remove ALKYL from ~/.claude/CLAUDE.md
+bash alkyl.sh setup-key perplexity <KEY>   # configure Perplexity API (optional)
+```
+
+---
+
+## What you can ask
+
+Once installed, ALKYL responds to natural chemistry requests:
+
+```
+"Compute QED, cLogP, and SA score for this SMILES: CC(=O)Oc1ccccc1C(=O)O"
+"Set up an AutoDock Vina virtual screening run against PDB:3HTB"
+"Write an ORCA input for B3LYP-D3BJ/def2-TZVP geometry optimization"
+"Run a MARTINI 3 membrane simulation with POPC bilayer"
+"Design a focused library around this fragment using REINVENT 4"
+"Estimate RBFE for these two congeneric ligands using OpenMMTools HREX"
+"Flag all hERG and PAINS alerts in my SDF library"
+"Explain the SN2 mechanism for this substrate using EASE"
+```
+
+---
+
+## Skills
+
+23 domain-specific skills, organized by workflow stage. Each skill is a reference file with practical code patterns and theoretical context — loaded only when needed.
+
+### Cheminformatics & molecular tools
 
 | Skill | Description |
 |-------|-------------|
-| `rdkit` | Complete RDKit usage: molecule I/O, descriptors (MW, cLogP, TPSA, QED), Morgan and MACCS fingerprints, 2D/3D conformer generation, substructure search, reactions, SVG/PNG visualization |
-| `ase` | Atomic Simulation Environment: Atoms objects, geometry optimization (BFGS/LBFGS/FIRE), NVE/NVT/NPT molecular dynamics (Langevin, Berendsen), NEB/AutoNEB transition states, vibrational analysis, thermochemistry, interface to ORCA/xTB/GPAW/LAMMPS |
-| `mdanalysis` | MD trajectory analysis: Universe/AtomGroup selection language, RMSD/RMSF/alignment, contact analysis (Q-value), hydrogen bond analysis, Ramachandran/DSSP, PCA free energy landscapes, RDF, MSD diffusion, protein-ligand interaction workflow |
-| `openbabel` | Open Babel format conversion (146 formats), 3D structure generation (MMFF94/UFF/GAFF), conformer search, protonation state at pH, SMARTS-based filtering, FP2/FP3/FP4/MACCS fingerprints, molecular descriptors, RDKit interoperability |
-| `deepchem` | DeepChem molecular ML: MoleculeNet datasets, featurization (ECFP/GraphConv/Weave), graph neural networks, QSAR/QSPR model training and evaluation |
-| `docking` | Protein-ligand docking and virtual screening: receptor preparation with pdbfixer/propka3, AutoDock Vina Python API and CLI, Gnina CNN rescoring, meeko PDBQT preparation, batch parallel docking, ProLIF interaction fingerprints, RMSD pose clustering, ensemble docking on MD snapshots |
-| `force-fields` | Molecular mechanics force fields: AMBER/CHARMM/OPLS-AA/SMIRNOFF families, OpenMM simulation setup (LangevinMiddleIntegrator, NPT barostat, DCD/XTC reporters), OpenFF Sage 2.2 with SMIRNOFF, GAFF2 parameterization (antechamber/acpype), AM1-BCC/RESP charge methods, water models (TIP3P/OPC), HMR |
-| `qm-dft` | Quantum chemistry: DFT functional/basis set selection (Jacob's ladder, D3BJ dispersion), ORCA 6.0 input/output/parsing (Opt, Freq, TS, TD-DFT, NMR, DLPNO, solvation), xTB/GFN2 (CLI, tblite Python API, CREST conformers/tautomers, pKa), PySCF (HF/DFT/MP2/CCSD, GIAO NMR, ESP/CHELPG), standard workflows (opt→freq→SP, barriers, UV-Vis) |
-| `homology-modeling` | Protein structure modeling: template search with HHblits/BLAST, pairwise alignment (BLOSUM62/PIR format), MODELLER 10 automodel/loopmodel/multi-template/DOPE ranking, AlphaFold2 via ColabFold CLI, ESMFold Python API, structure quality (pLDDT, Ramachandran, MolProbity), structure preparation (pdbfixer, propka3, HIS tautomers, disulfides, terminal capping) |
-| `free-energy` | Alchemical free energy calculations: thermodynamic cycles (RBFE/ABFE), FEP/TI/BAR/MBAR estimators, OpenMMTools AlchemicalFactory/MultiStateSampler/HREX, RBFE network design with LOMAP, perses and openfe campaign management, ABFE double-decoupling with Boresch restraints, pymbar (overlap matrix diagnostics, convergence, autocorrelation) |
-| `pharmacophore` | Pharmacophore modeling: feature types (HBD/HBA/AR/HYD/POS/NEG), FDEF format, RDKit Pharm2D Gobbi fingerprints, Pharm3D 3D matching with EmbedLib, structure-based pharmacophore from ProLIF/PLIP interactions, ligand-based alignment with O3A and DBSCAN clustering, virtual screening pipeline (conformers → scoring → exclusion volumes → enrichment EF/ROC) |
-| `generative-design` | De novo molecular generation: SELFIES always-valid grammar, SMILES language models (LSTM/GPT2/ChemGPT), REINVENT 4 RL with scoring components (QED, SA, docking oracle, custom Python), JT-VAE latent space Bayesian optimization, structure-based generation (DiffSBDD, TargetDiff, Pocket2Mol, DiffLinker), MOSES/GuacaMol evaluation metrics |
-| `mmpa` | Matched Molecular Pair Analysis: MMP definition and fragmentation (Hussain-Rea algorithm), SMIRKS transform notation, mmpdb 4 CLI workflow (fragment→index→loadprops→transform→analyze), RDKit programmatic MMP generation, activity cliff detection (SALI score), bioisostere table, focused library generation, REINVENT/docking integration |
-| `uncertainty-qsar` | Reliable QSAR predictions: epistemic vs. aleatoric decomposition, conformal prediction with MAPIE (split/CV+, coverage guarantee, Mondrian stratification), Gaussian processes with GPyTorch TanimotoKernel, MC Dropout (T=50 inference passes), deep ensembles (M=5 seeds), heteroscedastic head (NLL loss), Laplace approximation, applicability domain (kNN Tanimoto, Williams plot leverage, Mahalanobis), OECD Principle 3 compliance |
-| `active-learning` | Active molecular learning: query strategies (UCB/EI/BALD/QBC/Core-Set), batch mode (DPP/greedy submodular/cluster-then-rank), molecular representations for acquisition, RF/GP/conformal uncertainty, docking oracle integration (Vina/Gnina, ~50× screening speedup), BEDROC/EF evaluation, DMTA cycle management (Design-Make-Test-Analyze, batch composition, stopping criteria, round reports) |
-| `py3Dmol` | Interactive 3D molecular visualization (3Dmol.js): loading PDB/SDF/SMILES, cartoon/stick/sphere/surface styles (SES/SAS/VDW), selection language (chain/resi/resn/within), color schemes (spectrum/b-factor/rainbow/carbonColor), docking pose batch viewer with ipywidgets slider, pharmacophore overlay with spheres and labels, conformer animation, PNG/HTML export, NGLview for MD trajectories |
-| `coarse-grained` | Coarse-grained MD simulations (MARTINI 3): CG resolution levels and mapping schemes, protein CG with martinize2 (ElNeDyn elastic network, Go-MARTINI), lipid membrane assembly with insane.py (POPC/POPE/POPS/CHOL/PIP2, asymmetric bilayers), protein-membrane embedding, GROMACS CG workflows (semiisotropic pressure coupling), backward.py backmapping CG→AA with OpenMM refinement, membrane analysis (thickness, APL, Scd order parameter, lateral diffusion, density profiles) |
-| `binding-kinetics` | Drug-target binding kinetics: kon/koff/KD/residence time theory, kinetic selectivity (Copeland framework), two-state/induced-fit/conformational-selection models, SPR data fitting (Langmuir 1:1, two-state, Biacore CSV parsing), ITC data analysis (Wiseman isotherm, ΔG/ΔH/ΔS/ΔCp fitting, van't Hoff, enthalpy-entropy compensation), residence time by MD (τRAMD with HTMD, funnel metadynamics PLUMED, unbinding pathway analysis), kinetic QSAR (RF/GP koff models, koff cliffs, MMPA kinetic SAR) |
-| `fbdd` | Fragment-Based Drug Design: Hann complexity model, Rule of 3 filters (MW/cLogP/HBD/HBA), Ligand Efficiency metrics (LE/LLE/LLEAT/BEI/SEI/GE/LELP), fragment library design (Ro3+PAINS+reactive filters, Fsp3/3D diversity, ESOL solubility, MaxMin selection), fragment docking (high exhaustiveness, Gnina rescoring, RMSD clustering, hotspot validation), growing/linking/merging strategies (R-group enumeration, SMARTS reactions, MCS merging, REINVENT scaffold constraint), efficiency plot (Abad-Zapatero) and round reports |
-| `chem-brainstorm` | Flexible computational chemistry brainstorming guide: classify problem type → audit available data → map tools → generate directions → sanity checks → literature. Includes 4 rigid protocols (molecule evaluation, SAR hypothesis, reaction design, pipeline architecture). Integrates ALKYL scripts and all MCP tools (ChEMBL, OpenTargets, bioRxiv, ClinicalTrials) |
-| `daylight-theory` | Molecular informatics theory (based on Daylight Theory Manual): complete SMILES specification (atoms, bonds, branches, rings, isomeric, chirality), SMARTS query language (all primitives D/H/R/r/v/X/x/+/-/#n/a/A, operators !&;,, recursive SMARTS, reaction queries), SMIRKS transform grammar, path fingerprints and similarity metrics (Tanimoto/Dice/Tversky/Cosine + 15 variants), molecular graph model and aromaticity (Hückel 4N+2) |
-| `lit-rescue` | Literature search of last resort when hallucination risk is >20%: Perplexity→bioRxiv→PubMed waterfall, 7 query types (METHOD/PARAM/BUG/THEORY/PROTOCOL/BENCHMARK/DOMAIN), structured prompts with anti-hallucination framing, confidence reporting (★★★ to ☆☆☆), mandatory negative result block when no source found |
+| `rdkit` | Molecule I/O, descriptors (MW, cLogP, TPSA, QED), Morgan/MACCS fingerprints, 2D/3D conformer generation, substructure search, SMARTS reactions, SVG/PNG visualization |
+| `openbabel` | Format conversion (146 formats), 3D structure generation (MMFF94/UFF/GAFF), conformer search, protonation at pH, FP2/FP3/FP4/MACCS fingerprints, RDKit interoperability |
+| `daylight-theory` | Complete SMILES spec, SMARTS query language (all primitives, recursive SMARTS, reaction queries), SMIRKS transforms, path fingerprints, similarity metrics (Tanimoto/Dice/Tversky/Cosine + 15 variants) |
+| `chem-brainstorm` | Workflow guide: classify → audit data → map tools → generate directions → sanity checks → literature. 4 rigid protocols (molecule evaluation, SAR hypothesis, reaction design, pipeline). Integrates ALKYL scripts + MCP tools (ChEMBL, OpenTargets, bioRxiv, ClinicalTrials) |
 
-### 23 standalone Python scripts
+### Molecular dynamics & structure
 
-All scripts in `scripts/`. Each requires only RDKit (and stdlib). Run with any Python ≥ 3.9 environment that has RDKit installed.
+| Skill | Description |
+|-------|-------------|
+| `ase` | Atoms objects, geometry optimization (BFGS/LBFGS/FIRE), NVE/NVT/NPT MD (Langevin, Berendsen), NEB/AutoNEB transition states, vibrational analysis, thermochemistry, ORCA/xTB/GPAW/LAMMPS calculators |
+| `mdanalysis` | Universe/AtomGroup selection language, RMSD/RMSF/alignment, contact analysis (Q-value), H-bond analysis, Ramachandran/DSSP, PCA free energy landscapes, RDF, MSD diffusion, protein-ligand workflow |
+| `force-fields` | AMBER/CHARMM/OPLS-AA/SMIRNOFF families, OpenMM simulation setup (LangevinMiddleIntegrator, NPT barostat, DCD/XTC reporters), OpenFF Sage 2.2, GAFF2 parameterization (antechamber/acpype), AM1-BCC/RESP charges, HMR |
+| `coarse-grained` | MARTINI 3 CG simulations: protein CG with martinize2 (ElNeDyn, Go-MARTINI), membrane assembly with insane.py (POPC/POPE/POPS/CHOL/PIP2, asymmetric bilayers), GROMACS workflows, backward.py backmapping, membrane analysis (thickness, APL, Scd, lateral diffusion) |
 
-| Script | Description |
-|--------|-------------|
-| `chem_convert.py` | Convert molecules between SMILES, SDF, InChI, InChIKey, and SVG. Supports single molecules and batch files. |
-| `chem_props.py` | Compute molecular properties: MW, cLogP, TPSA, HBD, HBA, RotBonds, QED. Checks Lipinski Ro5 and PAINS alerts. Computes Morgan (ECFP4) and MACCS fingerprints. |
-| `chem_fetch.py` | Fetch molecular data from PubChem (by name, CID, or InChI) and ChEMBL (by name or ChEMBL ID). Returns SMILES, synonyms, and properties. Uses stdlib urllib only. |
-| `chem_3d.py` | Generate 3D conformers using ETKDGv3, then minimize with MMFF94 or UFF. Outputs SDF. Configurable number of conformers and energy window. |
-| `chem_qm.py` | Generate ORCA or Gaussian input files from SMILES (with automatic 3D embedding). Parse ORCA output files for energy, frequencies, thermochemical data, and IR spectrum (--parse-ir flag). |
-| `chem_batch.py` | Batch-process SDF/SMI/CSV files: compute descriptors, check Lipinski Ro5, flag PAINS. Supports --skip-invalid for robust handling of malformed inputs. Outputs CSV. |
-| `chem_search.py` | Search a molecular library by substructure (SMILES or SMARTS), Tanimoto similarity (configurable threshold), or exact match. Inputs: SDF or SMILES file. Outputs matches as SMILES or SDF. |
-| `chem_standardize.py` | Standardize molecules: desalt (largest fragment), neutralize charges, canonicalize SMILES. Uses RDKit MolStandardize LargestFragmentChooser and Uncharger. |
-| `chem_analyze.py` | Comprehensive single-molecule analysis: molecular formula, 16 functional group SMARTS, ring systems, stereocenters, QED, Synthetic Accessibility (SA) score, Bertz complexity. |
-| `chem_scaffold.py` | Extract Murcko scaffold, generic scaffold (all non-hydrogen atoms replaced by carbon), and BRICS fragments from a molecule. |
-| `chem_compare.py` | Compare two molecules: Maximum Common Substructure (rdFMCS), Tanimoto fingerprint similarity, and delta properties (B minus A for MW, cLogP, TPSA, HBD, HBA). |
-| `chem_filter.py` | Filter a molecular library by drug-likeness rules: Lipinski Ro5, Veber (oral bioavailability), Egan (absorption), Ghose (requires ≥20 heavy atoms), and PAINS alerts. |
-| `chem_react.py` | Apply SMARTS reaction transforms to reactants using RunReactants. Deduplicates and sanitizes products. Supports multi-step and multi-reactant reactions. |
-| `chem_tautomers.py` | Enumerate tautomers of a molecule using RDKit TautomerEnumerator. Returns the canonical tautomer and the full enumerated list with counts. |
-| `chem_enum.py` | Enumerate stereoisomers of a molecule (unique=True). Caps output at configurable max_isomers to prevent combinatorial explosion. |
-| `chem_pka.py` | Estimate pKa values using SMARTS-based ionization rules (acids and bases). Computes Henderson-Hasselbalch pH-speciation and dominant protonation state at target pH via RDKit MolStandardize. |
-| `chem_metabolism.py` | Predict CYP450 metabolic soft spots using 12 SMARTS rules across five isoforms (CYP3A4, CYP2D6, CYP2C9, CYP1A2, UGT/SULT). Highlights vulnerable positions on the molecule. |
-| `chem_diversity.py` | Select a maximally diverse subset of molecules using the MaxMin algorithm (O(k·n) complexity). Supports Morgan (ECFP4) and MACCS fingerprints. Handles cases where k ≥ library size. |
-| `chem_cluster.py` | Butina (Taylor-Butina) clustering of a molecular library by Tanimoto distance. Returns cluster IDs, centroids, and members. Configurable distance cutoff and fingerprint type. |
-| `chem_rgroup.py` | R-group decomposition around a SMARTS core scaffold. Returns a table of R1/R2/... substituents per molecule, matched and unmatched counts. Uses RDKit RGroupDecompose. |
-| `chem_admet.py` | Heuristic ADMET profiling: ESOL aqueous solubility (Delaney 2004), BBB penetration score, hERG cardiac risk (SMARTS alerts), P-gp substrate likelihood, plasma protein binding estimate. |
-| `chem_highlight.py` | Draw a molecule as SVG or PNG with a SMARTS-matched substructure highlighted. Outputs SVG to stdout or saves SVG/PNG to file. |
-| `chem_lead.py` | Compute ligand efficiency metrics (LE, LLE, BEI, LELP) from a CSV of structures and activities. Tracks metric evolution across optimization rounds with mean/delta per round. |
+### Quantum chemistry
 
-### Optional: Perplexity MCP
+| Skill | Description |
+|-------|-------------|
+| `qm-dft` | DFT functional/basis selection (Jacob's ladder, D3BJ dispersion), ORCA 6.0 (Opt/Freq/TS/TD-DFT/NMR/DLPNO/solvation), xTB/GFN2 (CLI, tblite API, CREST, pKa), PySCF (HF/DFT/MP2/CCSD, GIAO NMR, ESP/CHELPG), standard workflows (opt→freq→SP, barriers, UV-Vis) |
+| `organic-mechanisms` | Polar mechanism reasoning via EASE framework (Electrophile/Acid-Base/Sterics/Electron-Flow), SN1/SN2/E1/E2 decision tree, Zaitsev/Hofmann selectivity, HSAB (1,2 vs 1,4), arrow-pushing rules, retrosynthesis (disconnections, synthons, FGI, C–C/C–X toolbox) |
 
-For grounded web search in chemistry literature workflows:
+### Drug discovery & docking
 
-```bash
-bash setup-perplexity.sh YOUR_API_KEY
-```
+| Skill | Description |
+|-------|-------------|
+| `docking` | Receptor preparation (pdbfixer/propka3), AutoDock Vina Python API + CLI, Gnina CNN rescoring, meeko PDBQT prep, batch parallel docking, ProLIF interaction fingerprints, RMSD pose clustering, ensemble docking on MD snapshots |
+| `homology-modeling` | Template search (HHblits/BLAST), BLOSUM62/PIR alignment, MODELLER 10 (automodel/loopmodel/DOPE ranking), AlphaFold2 via ColabFold CLI, ESMFold API, structure quality (pLDDT, Ramachandran, MolProbity), structure prep (HIS tautomers, disulfides, capping) |
+| `fbdd` | Rule of 3 filters, Ligand Efficiency metrics (LE/LLE/LLEAT/BEI/SEI/GE/LELP), fragment library design (Ro3+PAINS+reactive+Fsp3), fragment docking (high exhaustiveness, Gnina, RMSD clustering), growing/linking/merging (R-group enumeration, MCS, REINVENT scaffold constraint), Abad-Zapatero plot |
+| `free-energy` | Thermodynamic cycles (RBFE/ABFE), FEP/TI/BAR/MBAR estimators, OpenMMTools AlchemicalFactory/MultiStateSampler/HREX, RBFE network design (LOMAP, perses, openfe), ABFE double-decoupling with Boresch restraints, pymbar (overlap matrix, convergence, autocorrelation) |
+| `binding-kinetics` | kon/koff/KD/residence time theory (Copeland framework), two-state/induced-fit/conformational-selection models, SPR fitting (Langmuir, Biacore CSV), ITC analysis (Wiseman isotherm, ΔG/ΔH/ΔS/ΔCp), τRAMD (HTMD + GROMACS), funnel metadynamics (PLUMED), kinetic QSAR (RF/GP koff models) |
+| `pharmacophore` | Feature types (HBD/HBA/AR/HYD/POS/NEG), FDEF format, RDKit Pharm2D Gobbi fingerprints, Pharm3D 3D matching, structure-based pharmacophore from ProLIF/PLIP interactions, ligand-based alignment (O3A, DBSCAN), full VS pipeline (conformers → scoring → exclusion volumes → EF/ROC) |
 
-This adds the `@perplexity-ai/mcp-server` to your Claude Code MCP settings. The `lit-rescue` skill uses it as its primary search source.
+### Molecular design & ML
+
+| Skill | Description |
+|-------|-------------|
+| `generative-design` | SELFIES always-valid grammar, SMILES LMs (LSTM/GPT2/ChemGPT), REINVENT 4 RL (QED/SA/docking oracle/custom scoring), JT-VAE latent space Bayesian optimization (botorch), structure-based generation (DiffSBDD, TargetDiff, DiffLinker), MOSES/GuacaMol evaluation |
+| `mmpa` | Matched Molecular Pair Analysis: Hussain-Rea fragmentation, SMIRKS transforms, mmpdb 4 CLI workflow (fragment→index→loadprops→transform→analyze), activity cliff detection (SALI), bioisostere table, focused library generation, REINVENT/docking integration |
+| `uncertainty-qsar` | Conformal prediction (MAPIE split/CV+, coverage guarantee, Mondrian), GP with GPyTorch TanimotoKernel, MC Dropout (T=50), deep ensembles (M=5), heteroscedastic head, Laplace approximation, applicability domain (kNN Tanimoto, Williams plot, Mahalanobis), OECD Principle 3 |
+| `active-learning` | Query strategies (UCB/EI/BALD/QBC/Core-Set), batch DPP/cluster-then-rank, docking oracle (Vina/Gnina, ~50× screening speedup), BEDROC/EF evaluation, DMTA cycle management (batch composition, stopping criteria, round reports) |
+
+### Visualization & utilities
+
+| Skill | Description |
+|-------|-------------|
+| `py3Dmol` | 3Dmol.js visualization: PDB/SDF/SMILES loading, cartoon/stick/sphere/surface styles (SES/SAS/VDW), selection language, color schemes (spectrum/b-factor), docking pose batch viewer (ipywidgets), pharmacophore overlay, conformer animation, PNG/HTML export, NGLview for MD |
+| `lit-rescue` | Literature search of last resort when hallucination risk is >20%: Perplexity→bioRxiv→PubMed waterfall, 7 query types (METHOD/PARAM/BUG/THEORY/PROTOCOL/BENCHMARK/DOMAIN), confidence reporting (★★★ to ☆☆☆), mandatory negative result block when no source found |
 
 ---
 
-## Requirements
+## Scripts
 
-- [Claude Code](https://claude.ai/code)
-- Python ≥ 3.9 with RDKit (for scripts and certain skills)
-- Optional per workflow: ORCA, xTB, GROMACS, OpenMM, MODELLER
+23 standalone Python scripts in `scripts/`. Each requires only RDKit (+ stdlib). Run with any Python ≥ 3.9 environment with RDKit.
 
-### Setup
+| Script | Description |
+|--------|-------------|
+| `chem_convert.py` | Convert molecules between SMILES, SDF, InChI, InChIKey, and SVG. Batch-capable. |
+| `chem_props.py` | MW, cLogP, TPSA, HBD, HBA, RotBonds, QED. Lipinski Ro5 + PAINS alerts. Morgan (ECFP4) and MACCS fingerprints. |
+| `chem_fetch.py` | Fetch from PubChem (name/CID/InChI) and ChEMBL (name/ID). SMILES, synonyms, properties. stdlib only. |
+| `chem_3d.py` | 3D conformer generation (ETKDGv3) + MMFF94/UFF minimization. Outputs SDF. |
+| `chem_qm.py` | ORCA/Gaussian input from SMILES (auto 3D embed). Parse ORCA output: energy, frequencies, thermochemistry, IR. |
+| `chem_batch.py` | Batch-process SDF/SMI/CSV: descriptors, Lipinski Ro5, PAINS. `--skip-invalid` for robust pipelines. |
+| `chem_search.py` | Substructure (SMILES/SMARTS), Tanimoto similarity, or exact match search against SDF/SMI libraries. |
+| `chem_standardize.py` | Desalt (largest fragment), neutralize charges, canonicalize SMILES via RDKit MolStandardize. |
+| `chem_analyze.py` | Single-molecule deep analysis: formula, 16 functional groups, ring systems, stereocenters, QED, SA score, Bertz complexity. |
+| `chem_scaffold.py` | Murcko scaffold, generic scaffold, BRICS fragments. |
+| `chem_compare.py` | Two-molecule comparison: MCS (rdFMCS), Tanimoto, Δ properties (MW, cLogP, TPSA, HBD, HBA). |
+| `chem_filter.py` | Drug-likeness filters: Lipinski Ro5, Veber, Egan, Ghose, PAINS. |
+| `chem_react.py` | Apply SMARTS reaction transforms (RunReactants). Deduplicate and sanitize products. |
+| `chem_tautomers.py` | Enumerate tautomers (TautomerEnumerator). Returns canonical + full list with counts. |
+| `chem_enum.py` | Enumerate stereoisomers (unique=True). Configurable cap on max_isomers. |
+| `chem_pka.py` | SMARTS-based pKa estimation, Henderson-Hasselbalch pH-speciation, dominant protonation state at target pH. |
+| `chem_metabolism.py` | CYP450 soft spot prediction: 12 SMARTS rules, five isoforms (CYP3A4/2D6/2C9/1A2/UGT-SULT). |
+| `chem_diversity.py` | MaxMin diversity selection (O(k·n)). Morgan (ECFP4) or MACCS. Handles k ≥ library size. |
+| `chem_cluster.py` | Butina/Taylor-Butina clustering by Tanimoto distance. Returns cluster IDs, centroids, members. |
+| `chem_rgroup.py` | R-group decomposition around a SMARTS core. R1/R2/... table + unmatched count (RGroupDecompose). |
+| `chem_admet.py` | Heuristic ADMET: ESOL aqueous solubility (Delaney 2004), BBB score, hERG SMARTS alerts, P-gp substrate, PPB estimate. |
+| `chem_highlight.py` | SVG/PNG with SMARTS-highlighted substructure. Stdout = SVG; `--out` = SVG or PNG. |
+| `chem_lead.py` | Ligand efficiency metrics (LE/LLE/BEI/LELP) from activity CSV. Tracks evolution across optimization rounds. |
+
+---
+
+## Optional: API keys
+
+ALKYL ships four MCP servers out of the box with no API key required: **bioRxiv**, **ChEMBL**, **ClinicalTrials.gov**, and **PubMed**. They are active immediately after install.
+
+### Perplexity (optional — grounded web search)
+
+For real-time literature search in the `lit-rescue` skill:
 
 ```bash
-# Create a local virtual environment with RDKit
-bash alkyl.sh venv
-
-# Run scripts
-.venv/bin/python scripts/chem_props.py --smiles 'CCO'
+bash alkyl.sh setup-key perplexity pplx-YOUR_KEY_HERE
 ```
+
+Get a key at [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api). Adds `@perplexity-ai/mcp-server` to your Claude Code MCP settings.
+
+---
 
 ## Tests
 
 ```bash
-# Unit tests only (no network)
+# Unit tests (no network)
 .venv/bin/python -m pytest tests/ -m "not network" -v
 
-# All tests including network
+# All tests including network calls
 .venv/bin/python -m pytest tests/ -v
 ```
 
@@ -141,36 +251,36 @@ bash alkyl.sh venv
 ## Project structure
 
 ```
-ALKYL/
-├── install.sh              # inject chemistry context into ~/.claude/CLAUDE.md
-├── uninstall.sh            # remove the injected block
-├── setup-perplexity.sh     # configure Perplexity MCP (optional)
+alkyl/
+├── alkyl.sh                # main management script (install/venv/status/repair/setup-key)
+├── install.sh              # shim → alkyl.sh install
+├── uninstall.sh            # shim → alkyl.sh uninstall
 ├── config/
 │   └── CLAUDE.md           # ALKYL identity, behavior, and full skill index
 ├── scripts/
-│   ├── chem_convert.py     # format conversion (SMILES/SDF/InChI/SVG)
+│   ├── chem_convert.py     # format conversion
 │   ├── chem_props.py       # molecular properties and fingerprints
-│   ├── chem_fetch.py       # PubChem and ChEMBL data retrieval
-│   ├── chem_3d.py          # ETKDGv3 conformer generation and minimization
-│   ├── chem_qm.py          # ORCA/Gaussian input generation and output parsing
-│   ├── chem_batch.py       # batch processing of molecular libraries
-│   ├── chem_search.py      # substructure, similarity, and exact search
-│   ├── chem_standardize.py # desalting, neutralization, canonicalization
-│   ├── chem_analyze.py     # comprehensive single-molecule analysis
-│   ├── chem_scaffold.py    # Murcko scaffold and BRICS fragmentation
-│   ├── chem_compare.py     # MCS, Tanimoto, and property delta
-│   ├── chem_filter.py      # Lipinski/Veber/Egan/Ghose/PAINS filters
+│   ├── chem_fetch.py       # PubChem and ChEMBL retrieval
+│   ├── chem_3d.py          # ETKDGv3 conformer generation
+│   ├── chem_qm.py          # ORCA/Gaussian input + output parsing
+│   ├── chem_batch.py       # batch processing
+│   ├── chem_search.py      # substructure, similarity, exact search
+│   ├── chem_standardize.py # desalting, neutralization
+│   ├── chem_analyze.py     # single-molecule deep analysis
+│   ├── chem_scaffold.py    # Murcko scaffold and BRICS
+│   ├── chem_compare.py     # MCS and property delta
+│   ├── chem_filter.py      # drug-likeness filters
 │   ├── chem_react.py       # SMARTS reaction application
-│   ├── chem_tautomers.py   # tautomer enumeration and canonicalization
+│   ├── chem_tautomers.py   # tautomer enumeration
 │   ├── chem_enum.py        # stereoisomer enumeration
 │   ├── chem_pka.py         # pKa estimation and protonation state
-│   ├── chem_metabolism.py  # CYP450 metabolic soft spot prediction
+│   ├── chem_metabolism.py  # CYP450 soft spot prediction
 │   ├── chem_diversity.py   # MaxMin diversity selection
-│   ├── chem_cluster.py     # Butina clustering by Tanimoto distance
-│   ├── chem_rgroup.py      # R-group decomposition around a SMARTS core
-│   ├── chem_admet.py       # ADMET heuristics (ESOL, BBB, hERG, P-gp, PPB)
-│   ├── chem_highlight.py   # SVG/PNG with SMARTS-matched atoms highlighted
-│   └── chem_lead.py        # ligand efficiency metrics (LE/LLE/BEI/LELP) per round
+│   ├── chem_cluster.py     # Butina clustering
+│   ├── chem_rgroup.py      # R-group decomposition
+│   ├── chem_admet.py       # ADMET heuristics
+│   ├── chem_highlight.py   # SMARTS-highlighted SVG/PNG
+│   └── chem_lead.py        # ligand efficiency metrics per round
 └── skills/
     ├── rdkit/              # RDKit cheminformatics
     ├── ase/                # Atomic Simulation Environment
@@ -193,8 +303,17 @@ ALKYL/
     ├── fbdd/               # fragment-based drug design
     ├── chem-brainstorm/    # workflow brainstorming guide
     ├── daylight-theory/    # SMILES/SMARTS/SMIRKS/fingerprints theory
-    └── lit-rescue/         # literature search of last resort
+    ├── lit-rescue/         # literature search of last resort
+    └── organic-mechanisms/ # EASE framework for polar organic mechanisms
 ```
+
+---
+
+## Requirements
+
+- [Claude Code](https://claude.ai/code) (required)
+- Python ≥ 3.9 with RDKit (for scripts and tests — created by `bash alkyl.sh venv`)
+- Optional per workflow: ORCA, xTB, GROMACS, OpenMM, MODELLER, AutoDock Vina
 
 ---
 
@@ -216,6 +335,7 @@ The skills in this repository draw on and are informed by the following works an
 - **mmpdb** — Andrew Dalke and contributors
 - **AlphaFold / ColabFold** — DeepMind, Sergey Ovchinnikov, Martin Steinegger
 - **ORCA** — Frank Neese and the ORCA development team
+- **EASE organic mechanism framework** — AceOrganicChem.com *Ace Organic Chemistry Mechanisms with E.A.S.E.* (2013); Clayden *Organic Chemistry* (Oxford); March *Advanced Organic Chemistry* (Wiley)
 - **Copeland binding kinetics framework** — Robert A. Copeland (*Evaluation of Enzyme Inhibitors in Drug Discovery*, Wiley)
 - **Hussain-Rea fragmentation** — Jameed Hussain, Ceara Rea (J. Chem. Inf. Model., 2010)
 - **Haussler Tanimoto kernel** — David Haussler (1999)

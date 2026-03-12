@@ -1,3 +1,8 @@
+---
+name: active-learning
+description: Use when designing active learning or closed-loop molecular optimization (DMTA cycles). Covers query strategies (UCB/EI/BALD/QBC), batch DPP selection, docking oracles (Vina/Gnina), BEDROC/EF metrics, and Design-Make-Test-Analyze campaign management.
+---
+
 # Active Learning for Drug Discovery
 
 ## Purpose

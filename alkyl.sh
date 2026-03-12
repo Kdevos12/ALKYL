@@ -68,14 +68,51 @@ inject_block() {
 
 # ── Commands ───────────────────────────────────────────────────────────────
 
+register_plugin() {
+    mkdir -p "$(dirname "$SETTINGS")"
+    [ -f "$SETTINGS" ] || echo '{"plugins":{}}' > "$SETTINGS"
+    python3 - "$SETTINGS" "$REPO_DIR" <<'PY'
+import json, sys, datetime
+path, repo = sys.argv[1], sys.argv[2]
+with open(path) as f:
+    d = json.load(f)
+now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+installed = json.load(open("/home/de/.claude/plugins/installed_plugins.json"))
+installed["plugins"]["alkyl@local"] = [{
+    "scope": "user",
+    "installPath": repo,
+    "version": "1.0.0",
+    "installedAt": now,
+    "lastUpdated": now,
+    "gitCommitSha": "local"
+}]
+with open("/home/de/.claude/plugins/installed_plugins.json", "w") as f:
+    json.dump(installed, f, indent=2)
+PY
+}
+
+deregister_plugin() {
+    python3 - <<'PY'
+import json
+path = "/home/de/.claude/plugins/installed_plugins.json"
+with open(path) as f:
+    d = json.load(f)
+d["plugins"].pop("alkyl@local", None)
+with open(path, "w") as f:
+    json.dump(d, f, indent=2)
+PY
+}
+
 cmd_install() {
     print_logo
     if is_installed; then
         printf "  ${YELLOW}⚠ ALKYL already installed. Re-injecting (idempotent)...${RESET}\n"
     fi
     inject_block
+    register_plugin
     printf "  ${GREEN}✓ Chemistry context injected into $CLAUDE_MD${RESET}\n"
-    printf "  ${GREEN}✓ ALKYL active in all future claude sessions${RESET}\n\n"
+    printf "  ${GREEN}✓ ALKYL registered as plugin (visible in /plugins)${RESET}\n"
+    printf "  ${GREEN}✓ 23 skills discoverable via /skills${RESET}\n\n"
     printf "  ${DIM}Repair:    bash alkyl.sh repair${RESET}\n"
     printf "  ${DIM}Uninstall: bash alkyl.sh uninstall${RESET}\n"
     printf "  ${DIM}API keys:  bash alkyl.sh setup-key perplexity <KEY>${RESET}\n\n"
@@ -97,6 +134,8 @@ cmd_uninstall() {
     else
         printf "  ${DIM}ALKYL was not installed in $CLAUDE_MD${RESET}\n"
     fi
+    deregister_plugin
+    printf "  ${GREEN}✓ ALKYL deregistered from plugin system${RESET}\n"
 
     # Optional: remove MCP keys from settings.json
     if [ -f "$SETTINGS" ] && grep -q '"perplexity"' "$SETTINGS" 2>/dev/null; then

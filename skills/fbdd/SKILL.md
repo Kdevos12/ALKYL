@@ -1,3 +1,8 @@
+---
+name: fbdd
+description: Use for fragment-based drug design (FBDD): Rule of 3 filtering, ligand efficiency metrics (LE/LLE/BEI/LELP), fragment library design, fragment docking (Vina/Gnina), fragment growing/linking/merging strategies, and Abad-Zapatero efficiency plots.
+---
+
 # Fragment-Based Drug Design (FBDD)
 
 ## Purpose

@@ -1,3 +1,8 @@
+---
+name: coarse-grained
+description: Use when running coarse-grained (CG) molecular dynamics with MARTINI 3. Covers protein CG with martinize2, membrane assembly with insane.py (POPC/POPE/CHOL bilayers), GROMACS CG workflows, backmapping CG to all-atom, and CG membrane analysis.
+---
+
 # Coarse-Grained Molecular Dynamics
 
 ## Purpose

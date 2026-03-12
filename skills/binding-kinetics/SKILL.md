@@ -1,3 +1,8 @@
+---
+name: binding-kinetics
+description: Use when analyzing or predicting drug-target binding kinetics: kon, koff, KD, residence time, SPR data fitting (Langmuir/two-state), ITC thermodynamics, tau-RAMD and funnel metadynamics for unbinding, or kinetic QSAR models.
+---
+
 # Binding Kinetics
 
 ## Purpose

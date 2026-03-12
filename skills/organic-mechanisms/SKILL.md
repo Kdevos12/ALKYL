@@ -1,3 +1,8 @@
+---
+name: organic-mechanisms
+description: Use when reasoning about polar organic reaction mechanisms, arrow pushing, SN1/SN2/E1/E2, nucleophile/electrophile identification, Zaitsev/Hofmann selectivity, HSAB rules, or retrosynthesis. Applies the EASE framework step-by-step.
+---
+
 # Organic Mechanisms — EASE Framework
 
 **Source**: AceOrganicChem.com *Ace Organic Chemistry Mechanisms with E.A.S.E.* (2013) + standard references (Clayden, March).

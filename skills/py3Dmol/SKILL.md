@@ -1,3 +1,8 @@
+---
+name: py3Dmol
+description: Use when creating 3D molecular visualizations with py3Dmol (3Dmol.js). Covers PDB/SDF/SMILES loading, cartoon/stick/sphere styles, protein-ligand complexes, docking pose viewers, selection language, PNG/HTML export, and NGLview for MD trajectories.
+---
+
 # py3Dmol — Molecular Visualization
 
 ## Purpose

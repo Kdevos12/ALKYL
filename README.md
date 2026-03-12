@@ -42,9 +42,13 @@ cd alkyl
 
 ### Step 2 — Install ALKYL
 
+<img width="558" height="271" alt="image" src="https://github.com/user-attachments/assets/994bd1b1-4a4d-4007-8c9f-381f2bc92478" />
+
+
 ```bash
 bash alkyl.sh install
 ```
+
 
 This injects a chemistry-specialized context block into `~/.claude/CLAUDE.md` — the global configuration file Claude Code reads at every session start. No daemon, no wrapper, no separate command.
 

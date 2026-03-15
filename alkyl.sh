@@ -68,9 +68,32 @@ inject_block() {
 
 # ── Commands ───────────────────────────────────────────────────────────────
 
+link_skills() {
+    local skills_dst="$HOME/.claude/skills"
+    mkdir -p "$skills_dst"
+    for skill_dir in "$REPO_DIR/skills"/*/; do
+        [ -f "${skill_dir}SKILL.md" ] || continue
+        ln -sfn "$skill_dir" "$skills_dst/$(basename "$skill_dir")"
+    done
+}
+
+unlink_skills() {
+    local skills_dst="$HOME/.claude/skills"
+    for skill_dir in "$REPO_DIR/skills"/*/; do
+        [ -f "${skill_dir}SKILL.md" ] || continue
+        local name
+        name=$(basename "$skill_dir")
+        # Only remove if it's our symlink
+        if [ -L "$skills_dst/$name" ] && [ "$(readlink "$skills_dst/$name")" = "$skill_dir" ]; then
+            rm "$skills_dst/$name"
+        fi
+    done
+}
+
 register_plugin() {
     mkdir -p "$(dirname "$SETTINGS")"
     [ -f "$SETTINGS" ] || echo '{"plugins":{}}' > "$SETTINGS"
+    link_skills
     python3 - "$SETTINGS" "$REPO_DIR" "$HOME/.claude/plugins/installed_plugins.json" <<'PY'
 import json, sys, datetime
 path, repo, plugins_path = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -96,6 +119,7 @@ PY
 }
 
 deregister_plugin() {
+    unlink_skills
     python3 - "$HOME/.claude/plugins/installed_plugins.json" "$SETTINGS" <<'PY'
 import json, os, sys
 plugins_path, settings_path = sys.argv[1], sys.argv[2]

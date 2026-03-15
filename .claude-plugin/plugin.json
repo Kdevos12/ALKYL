@@ -1,7 +1,9 @@
 {
   "name": "alkyl",
+  "version": "1.0.0",
   "description": "Computational chemistry and drug discovery plugin for Claude Code — RDKit, docking, MD, QM, FEP, generative design, and 23 domain skills",
   "author": {
     "name": "Kyllian de Vos"
-  }
+  },
+  "license": "MIT"
 }
